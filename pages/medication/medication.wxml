@@ -1,0 +1,264 @@
+<!-- pages/medication/medication.wxml -->
+<view class="page-root">
+
+  <!-- ===== Tab 导航 ===== -->
+  <view class="tab-bar">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="index"
+      class="tab-item {{activeTab === index ? 'tab-active' : ''}}"
+      bindtap="switchTab"
+      data-tab="{{index}}"
+    >
+      <text class="tab-text">{{item}}</text>
+    </view>
+  </view>
+
+  <!-- ===== 今日用药 ===== -->
+  <scroll-view wx:if="{{activeTab === 0}}" class="tab-scroll" scroll-y>
+    <view class="tab-content">
+
+      <!-- 今日进度卡片 -->
+      <view class="progress-card card">
+        <view class="progress-header">
+          <view>
+            <text class="progress-date">{{todayDateStr}}</text>
+            <text class="progress-title">今日用药</text>
+          </view>
+          <view class="progress-ring {{allCompleted ? 'ring-done' : ''}}">
+            <text class="progress-num">{{doneCount}}</text>
+            <text class="progress-total">/{{totalCount}}</text>
+          </view>
+        </view>
+        <view wx:if="{{showProgressBar}}" class="progress-bar-bg">
+          <view
+            class="progress-bar-fill {{allCompleted ? 'fill-done' : ''}}"
+            style="width: {{progressWidth}}%"
+          ></view>
+        </view>
+        <text class="progress-tip {{allCompleted ? 'tip-done' : ''}}">{{progressTip}}</text>
+      </view>
+
+      <!-- 空状态 -->
+      <view wx:if="{{todayMeds.length === 0}}" class="empty-wrap">
+        <text class="empty-icon">💊</text>
+        <text class="empty-text">还没有药品记录</text>
+        <text class="empty-sub">切换到「我的药单」添加药品</text>
+      </view>
+
+      <!-- 药品打卡列表 -->
+      <view
+        wx:for="{{todayMeds}}"
+        wx:key="id"
+        class="med-card card"
+      >
+        <view class="med-card-header">
+          <view class="med-icon-wrap">
+            <text class="med-icon">💊</text>
+          </view>
+          <view class="med-info">
+            <text class="med-name">{{item.name}}</text>
+            <text wx:if="{{item.dosage}}" class="med-dosage">{{item.dosage}}</text>
+            <text wx:if="{{item.note}}" class="med-note">{{item.note}}</text>
+          </view>
+        </view>
+        <view class="slot-row">
+          <view
+            wx:for="{{item.slots}}"
+            wx:for-item="slot"
+            wx:key="key"
+            class="slot-btn {{slot.done ? 'slot-done' : 'slot-todo'}}"
+            bindtap="toggleSlot"
+            data-med-id="{{item.id}}"
+            data-slot-key="{{slot.key}}"
+          >
+            <text class="slot-check">{{slot.done ? '✓' : ''}}</text>
+            <text class="slot-label">{{slot.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view style="height: 60rpx;"></view>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 我的药单 ===== -->
+  <scroll-view wx:if="{{activeTab === 1}}" class="tab-scroll" scroll-y>
+    <view class="tab-content">
+
+      <!-- 空状态 -->
+      <view wx:if="{{medList.length === 0}}" class="empty-wrap">
+        <text class="empty-icon">📋</text>
+        <text class="empty-text">还没有药品</text>
+        <text class="empty-sub">点击下方按钮添加你正在服用的药品</text>
+      </view>
+
+      <!-- 药品列表 -->
+      <view
+        wx:for="{{medList}}"
+        wx:key="id"
+        class="med-list-card card"
+      >
+        <view class="med-list-left">
+          <view class="med-icon-wrap">
+            <text class="med-icon">💊</text>
+          </view>
+          <view class="med-list-info">
+            <text class="med-name">{{item.name}}</text>
+            <text wx:if="{{item.dosage}}" class="med-dosage">{{item.dosage}}</text>
+            <view class="time-tags">
+              <view
+                wx:for="{{item.times}}"
+                wx:for-item="t"
+                wx:key="t"
+                class="time-tag"
+              >
+                <text>{{t === 'morning' ? '早' : t === 'noon' ? '午' : t === 'evening' ? '晚' : '睡前'}}</text>
+              </view>
+            </view>
+            <text wx:if="{{item.note}}" class="med-note">{{item.note}}</text>
+          </view>
+        </view>
+        <view class="med-list-actions">
+          <view class="action-btn edit-btn" bindtap="openEditSheet" data-id="{{item.id}}">
+            <text>编辑</text>
+          </view>
+          <view class="action-btn del-btn" bindtap="deleteMed" data-id="{{item.id}}">
+            <text>删除</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 添加按钮 -->
+      <view class="add-btn-wrap">
+        <button class="btn-primary add-btn" bindtap="openAddSheet">+ 添加药品</button>
+      </view>
+
+      <view style="height: 60rpx;"></view>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 用药日历 ===== -->
+  <scroll-view wx:if="{{activeTab === 2}}" class="tab-scroll" scroll-y>
+    <view class="tab-content">
+
+      <view class="calendar-card card">
+        <text class="calendar-title">近 30 天服药记录</text>
+        <view class="calendar-legend">
+          <view class="legend-item"><view class="legend-dot dot-l0"></view><text>无配置</text></view>
+          <view class="legend-item"><view class="legend-dot dot-l1"></view><text>未打卡</text></view>
+          <view class="legend-item"><view class="legend-dot dot-l2"></view><text>部分完成</text></view>
+          <view class="legend-item"><view class="legend-dot dot-l3"></view><text>全部完成</text></view>
+        </view>
+        <view class="calendar-grid">
+          <view
+            wx:for="{{calendarDays}}"
+            wx:key="key"
+            class="cal-cell dot-l{{item.level}} {{item.isToday ? 'cal-today' : ''}}"
+          >
+            <text wx:if="{{item.isToday}}" class="cal-date-text">今</text>
+          </view>
+        </view>
+        <view class="calendar-date-row">
+          <text class="cal-range-text">30天前</text>
+          <text class="cal-range-text">今天</text>
+        </view>
+      </view>
+
+      <!-- 统计概览 -->
+      <view class="stats-card card">
+        <text class="stats-title">打卡概览</text>
+        <view class="stats-row">
+          <view class="stats-item">
+            <text class="stats-num">{{medCount}}</text>
+            <text class="stats-label">药品数量</text>
+          </view>
+          <view class="stats-divider"></view>
+          <view class="stats-item">
+            <text class="stats-num">{{fullDays}}</text>
+            <text class="stats-label">全勤天数</text>
+          </view>
+          <view class="stats-divider"></view>
+          <view class="stats-item">
+            <text class="stats-num">{{activeDays}}</text>
+            <text class="stats-label">有打卡天数</text>
+          </view>
+        </view>
+      </view>
+
+      <view style="height: 60rpx;"></view>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 添加/编辑药品弹窗 ===== -->
+  <view wx:if="{{showSheet}}" class="overlay">
+    <view class="overlay-mask" bindtap="closeSheet"></view>
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-handle"></view>
+      <text class="sheet-title">{{editMode ? '编辑药品' : '添加药品'}}</text>
+
+      <!-- 药品名称 -->
+      <view class="field-wrap">
+        <text class="field-label">药品名称 *</text>
+        <input
+          class="field-input"
+          placeholder="如：阿莫西林、维生素C"
+          placeholder-class="field-placeholder"
+          placeholder-style="line-height: 88rpx; color: #C4BEF0; font-size: 28rpx;"
+          value="{{form.name}}"
+          bindinput="onNameInput"
+          maxlength="30"
+        />
+      </view>
+
+      <!-- 剂量 -->
+      <view class="field-wrap">
+        <text class="field-label">剂量（可选）</text>
+        <input
+          class="field-input"
+          placeholder="如：500mg、1片"
+          placeholder-class="field-placeholder"
+          placeholder-style="line-height: 88rpx; color: #C4BEF0; font-size: 28rpx;"
+          value="{{form.dosage}}"
+          bindinput="onDosageInput"
+          maxlength="20"
+        />
+      </view>
+
+      <!-- 服用时段 -->
+      <view class="field-wrap">
+        <text class="field-label">服用时段 *</text>
+        <view class="time-selector">
+          <view
+            wx:for="{{timeOptions}}"
+            wx:key="key"
+            class="time-option {{item.selected ? 'time-selected' : ''}}"
+            bindtap="toggleTime"
+            data-time="{{item.key}}"
+          >
+            <text>{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 备注 -->
+      <view class="field-wrap">
+        <text class="field-label">备注（可选）</text>
+        <input
+          class="field-input"
+          placeholder="如：饭后服用、随餐"
+          placeholder-class="field-placeholder"
+          placeholder-style="line-height: 88rpx; color: #C4BEF0; font-size: 28rpx;"
+          value="{{form.note}}"
+          bindinput="onNoteInput"
+          maxlength="40"
+        />
+      </view>
+
+      <button class="btn-primary save-btn" bindtap="saveMed">
+        {{editMode ? '保存修改' : '添加药品'}}
+      </button>
+    </view>
+  </view>
+
+</view>

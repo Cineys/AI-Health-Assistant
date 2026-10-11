@@ -1,0 +1,165 @@
+/* pages/monthly/monthly.wxss */
+
+/* 重新生成按钮 */
+.regen-btn {
+  margin-left: auto;
+  padding: 12rpx 28rpx;
+  background: rgba(123, 104, 238, 0.1);
+  border-radius: 100rpx;
+  border: 1.5rpx solid rgba(123, 104, 238, 0.25);
+}
+.regen-btn-text {
+  font-size: 22rpx;
+  color: #7B68EE;
+  font-weight: 600;
+}
+
+.monthly-root {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #EDEAFF 0%, #F5F4FF 50%, #EAF0FF 100%);
+  padding-bottom: 80rpx;
+}
+
+/* ===== 状态占位 ===== */
+.state-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 160rpx 0;
+  gap: 24rpx;
+}
+
+.state-icon { font-size: 80rpx; }
+
+.state-text {
+  font-size: 28rpx;
+  color: #9A98C0;
+  text-align: center;
+  padding: 0 60rpx;
+  line-height: 1.6;
+}
+
+.retry-btn {
+  margin-top: 8rpx;
+  background: linear-gradient(135deg, #7B68EE, #9B8BF5);
+  color: #fff;
+  border-radius: 100rpx;
+  padding: 22rpx 60rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+/* ===== 头部 ===== */
+.monthly-header {
+  background: linear-gradient(135deg, #7B68EE, #9B8BF5);
+  padding: 40rpx 36rpx 36rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.monthly-header-icon {
+  font-size: 56rpx;
+  flex-shrink: 0;
+}
+
+.monthly-header-title {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6rpx;
+}
+
+.monthly-header-date {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ===== 内容区 ===== */
+.monthly-body {
+  padding: 24rpx 32rpx 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+/* ===== 通用卡片 ===== */
+.m-card {
+  background: rgba(255, 255, 255, 0.86);
+  border-radius: 28rpx;
+  padding: 28rpx 26rpx;
+  box-shadow: 0 4rpx 20rpx rgba(123, 104, 238, 0.08);
+  border: 1.5rpx solid rgba(255, 255, 255, 0.92);
+}
+
+.m-card-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.m-card-icon { font-size: 30rpx; }
+
+.m-card-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #2D2B55;
+}
+
+.m-card-content {
+  font-size: 27rpx;
+  color: #4A4870;
+  line-height: 1.8;
+}
+
+/* ===== 各卡片主题色 ===== */
+.m-card-mood {
+  background: linear-gradient(135deg, rgba(82,196,122,0.06), rgba(100,220,140,0.1));
+  border-color: rgba(82, 196, 122, 0.2);
+}
+
+.m-card-physical {
+  background: linear-gradient(135deg, rgba(64,128,255,0.06), rgba(100,160,255,0.1));
+  border-color: rgba(64, 128, 255, 0.2);
+}
+
+.m-card-psycho {
+  background: linear-gradient(135deg, rgba(255,184,48,0.06), rgba(255,210,100,0.1));
+  border-color: rgba(255, 184, 48, 0.25);
+}
+
+.m-card-suggest {
+  background: linear-gradient(135deg, rgba(123,104,238,0.06), rgba(155,139,245,0.1));
+  border-color: rgba(123, 104, 238, 0.2);
+}
+
+/* ===== 建议列表 ===== */
+.suggest-item {
+  display: flex;
+  flex-direction: row;
+  gap: 10rpx;
+  margin-bottom: 14rpx;
+  align-items: flex-start;
+}
+
+.suggest-item:last-child { margin-bottom: 0; }
+
+.suggest-dot {
+  font-size: 30rpx;
+  color: #7B68EE;
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1.6;
+}
+
+.suggest-text {
+  font-size: 27rpx;
+  color: #4A4870;
+  line-height: 1.7;
+  flex: 1;
+}

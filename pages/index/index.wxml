@@ -1,0 +1,189 @@
+<!-- pages/index/index.wxml -->
+<view class="page-root">
+
+  <!-- ===== 顶部状态栏占位 ===== -->
+  <view class="status-bar-placeholder" style="height: {{statusBarHeight}}px"></view>
+
+  <!-- ===== 顶部问候区 ===== -->
+  <view class="header-area">
+    <view class="greeting-row">
+      <view>
+        <text class="greeting-time">{{greeting}}</text>
+        <text class="greeting-name">{{nickname}} 👋</text>
+      </view>
+      <view class="avatar-mini">
+        <text class="avatar-text">{{avatarEmoji || nickname[0] || '健'}}</text>
+      </view>
+    </view>
+
+    <!-- 周日历 -->
+    <scroll-view class="week-calendar" scroll-x enable-flex>
+      <view class="week-inner">
+        <view
+          wx:for="{{weekDays}}"
+          wx:key="index"
+          class="day-item {{item.isToday ? 'day-today' : ''}} {{item.isFuture ? 'day-future' : ''}}"
+          bindtap="onDayTap"
+          data-index="{{index}}"
+        >
+          <text class="day-name">{{item.name}}</text>
+          <!-- 已打卡：显示心情 emoji；今天：白点；未打卡：空点 -->
+          <view wx:if="{{item.hasMood && !item.isToday}}" class="day-mood-emoji">
+            <text>{{item.moodEmoji}}</text>
+          </view>
+          <view wx:elif="{{item.isToday}}" class="day-dot dot-today"></view>
+          <view wx:else class="day-dot dot-empty"></view>
+          <text class="day-num {{item.isToday ? 'day-num-active' : (item.isFuture ? 'day-num-future' : '')}}">{{item.date}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- ===== 主内容滚动区 ===== -->
+  <scroll-view class="main-scroll" scroll-y>
+  <view class="main-content">
+
+    <!-- 大欢迎卡片 (Glassmorphism) -->
+    <view class="hero-card card">
+      <!-- 背景装饰文字 -->
+      <text class="hero-bg-text">HEALTH</text>
+      <view class="hero-content">
+        <view class="hero-illus">
+          <text class="illus-emoji">🌟</text>
+        </view>
+        <text class="hero-title">{{greeting}}，</text>
+        <text class="hero-subtitle">今天感觉怎么样？</text>
+        <text class="hero-hint">记录你的心情，让健康陪伴你每一天</text>
+        <button class="btn-primary hero-btn" bindtap="goToMood">开始记录心情</button>
+      </view>
+    </view>
+
+    <!-- 快捷入口 -->
+    <view class="quick-grid">
+      <view class="quick-item card" bindtap="goToChat">
+        <text class="quick-icon">🏥</text>
+        <text class="quick-label">AI 诊室</text>
+        <text class="quick-desc">症状咨询</text>
+      </view>
+      <view class="quick-item card" bindtap="goToEmotional">
+        <text class="quick-icon">💬</text>
+        <text class="quick-label">心理疏导</text>
+        <text class="quick-desc">倾听陪伴</text>
+      </view>
+      <view class="quick-item card" bindtap="goToReport">
+        <text class="quick-icon">📋</text>
+        <text class="quick-label">健康报告</text>
+        <text class="quick-desc">查看记录</text>
+      </view>
+      <view class="quick-item card" bindtap="goToProfile">
+        <text class="quick-icon">📊</text>
+        <text class="quick-label">活力指数</text>
+        <text class="quick-desc">数据看板</text>
+      </view>
+      <view class="quick-item card" bindtap="goToDiet">
+        <text class="quick-icon">🥗</text>
+        <text class="quick-label">膳食管家</text>
+        <text class="quick-desc">饮食调理</text>
+      </view>
+      <view class="quick-item card" bindtap="goToMedicine">
+        <text class="quick-icon">💊</text>
+        <text class="quick-label">用药助手</text>
+        <text class="quick-desc">服药打卡</text>
+      </view>
+    </view>
+
+    <!-- 心情打卡卡片 -->
+    <view class="section-wrap">
+      <text class="section-title">💜 今日心情打卡</text>
+      <view class="mood-card card">
+        <text class="mood-question">现在的心情如何？</text>
+        <view class="mood-emojis">
+          <view
+            wx:for="{{moodList}}"
+            wx:key="index"
+            class="mood-emoji-item {{selectedMood === index ? 'mood-selected' : ''}}"
+            bindtap="selectMood"
+            data-index="{{index}}"
+          >
+            <text class="mood-emoji">{{item.emoji}}</text>
+            <text class="mood-text">{{item.label}}</text>
+          </view>
+        </view>
+        <!-- 日记随笔输入框 -->
+        <view class="diary-wrap">
+          <textarea
+            class="diary-input"
+            placeholder="写几句今天的随笔... (可选)"
+            placeholder-class="diary-placeholder"
+            value="{{diaryText}}"
+            bindinput="onDiaryInput"
+            maxlength="200"
+            auto-height
+          />
+          <text class="diary-count">{{diaryText.length}}/200</text>
+        </view>
+        <button
+          class="btn-primary mood-save-btn {{todayAlreadyChecked ? 'mood-save-btn-done' : ''}}"
+          bindtap="saveMood"
+        >{{todayAlreadyChecked ? '今日已打卡 ✓ 修改' : '保存打卡'}}</button>
+      </view>
+    </view>
+
+    <!-- 推荐健康话题 -->
+    <view class="section-wrap">
+      <text class="section-title">✨ 推荐健康话题</text>
+      <view
+        wx:for="{{healthTopics}}"
+        wx:key="index"
+        class="topic-card card"
+        bindtap="startTopicChat"
+        data-topic="{{item.title}}"
+      >
+        <view class="topic-left">
+          <text class="topic-icon">{{item.icon}}</text>
+          <view>
+            <text class="topic-title">{{item.title}}</text>
+            <text class="topic-sub">{{item.sub}}</text>
+          </view>
+        </view>
+        <text class="topic-arrow">›</text>
+      </view>
+    </view>
+
+    <view style="height: 40rpx;"></view>
+  </view>
+  </scroll-view>
+
+  <!-- ===== 日记弹窗 ===== -->
+  <view wx:if="{{showDayPopup}}" class="popup-overlay" bindtap="closePopup">
+    <view class="popup-sheet" catchtap="">
+      <view class="popup-handle"></view>
+      <text class="popup-date">{{popupDay.dateStr}}</text>
+
+      <block wx:if="{{popupDay.hasMood}}">
+        <view class="popup-mood-row">
+          <text class="popup-emoji">{{popupDay.emoji}}</text>
+          <view class="popup-mood-info">
+            <text class="popup-mood-label">{{popupDay.label}}</text>
+            <text class="popup-mood-hint">今日心情</text>
+          </view>
+        </view>
+        <view class="popup-diary-wrap">
+          <text wx:if="{{popupDay.diary}}" class="popup-diary-text">{{popupDay.diary}}</text>
+          <view wx:else class="popup-diary-empty">
+            <text class="popup-diary-empty-icon">✏️</text>
+            <text class="popup-diary-empty-text">这天没有留下随笔</text>
+          </view>
+        </view>
+      </block>
+
+      <view wx:else class="popup-no-record">
+        <text class="popup-no-record-icon">🌙</text>
+        <text class="popup-no-record-text">这天还没有打卡记录</text>
+      </view>
+
+      <button class="popup-close-btn" bindtap="closePopup">关闭</button>
+    </view>
+  </view>
+
+</view>

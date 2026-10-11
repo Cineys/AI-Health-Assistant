@@ -1,0 +1,47 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/chat/chat",
+    "pages/profile/profile",
+    "pages/report/report",
+    "pages/reports/reports",
+    "pages/monthly/monthly",
+    "pages/emotional/emotional",
+    "pages/annual/annual",
+    "pages/medication/medication"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "健康助手",
+    "navigationBarBackgroundColor": "#F7F8FC",
+    "backgroundColor": "#F7F8FC",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#B0B0C0",
+    "selectedColor": "#7B68EE",
+    "backgroundColor": "#FDFDFE",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/icons/home.png",
+        "selectedIconPath": "assets/icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/chat/chat",
+        "text": "AI诊室",
+        "iconPath": "assets/icons/chat.png",
+        "selectedIconPath": "assets/icons/chat-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "assets/icons/user.png",
+        "selectedIconPath": "assets/icons/user-active.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json"
+}

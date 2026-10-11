@@ -1,0 +1,89 @@
+<!-- pages/monthly/monthly.wxml -->
+<scroll-view class="monthly-root" scroll-y>
+
+  <!-- ===== 加载中 ===== -->
+  <view wx:if="{{loading}}" class="state-wrap">
+    <text class="state-icon">⏳</text>
+    <text class="state-text">{{regenerating ? 'AI 正在重新生成月度总结...' : 'AI 正在生成月度总结...'}}</text>
+  </view>
+
+  <!-- ===== 错误态 ===== -->
+  <view wx:elif="{{errorMsg}}" class="state-wrap">
+    <text class="state-icon">😕</text>
+    <text class="state-text">{{errorMsg}}</text>
+    <view class="retry-btn" bindtap="retry">重新生成</view>
+  </view>
+
+  <!-- ===== 报告内容 ===== -->
+  <block wx:elif="{{report}}">
+
+    <!-- 头部 -->
+    <view class="monthly-header">
+      <text class="monthly-header-icon">📊</text>
+      <view class="monthly-header-info">
+        <text class="monthly-header-title">月度健康洞察</text>
+        <text class="monthly-header-date">生成时间：{{report.generated_at}}</text>
+      </view>
+      <!-- 重新生成按钮 -->
+      <view class="regen-btn" bindtap="regenerate">
+        <text class="regen-btn-text">重新生成</text>
+      </view>
+    </view>
+
+    <view class="monthly-body">
+
+      <!-- 整体概述 -->
+      <view class="m-card">
+        <view class="m-card-header">
+          <text class="m-card-icon">🌟</text>
+          <text class="m-card-title">整体健康概述</text>
+        </view>
+        <text class="m-card-content">{{report.summary || '—'}}</text>
+      </view>
+
+      <!-- 情绪健康 -->
+      <view class="m-card m-card-mood">
+        <view class="m-card-header">
+          <text class="m-card-icon">😊</text>
+          <text class="m-card-title">情绪健康分析</text>
+        </view>
+        <text class="m-card-content">{{report.mood_insight || '—'}}</text>
+      </view>
+
+      <!-- 生理趋势 -->
+      <view class="m-card m-card-physical">
+        <view class="m-card-header">
+          <text class="m-card-icon">💪</text>
+          <text class="m-card-title">生理健康趋势</text>
+        </view>
+        <text class="m-card-content">{{report.physical_trend || '—'}}</text>
+      </view>
+
+      <!-- 心身关联 -->
+      <view class="m-card m-card-psycho">
+        <view class="m-card-header">
+          <text class="m-card-icon">🧠</text>
+          <text class="m-card-title">心身关联分析</text>
+        </view>
+        <text class="m-card-content">{{report.psychosomatic_link || '—'}}</text>
+      </view>
+
+      <!-- AI 建议 -->
+      <view class="m-card m-card-suggest">
+        <view class="m-card-header">
+          <text class="m-card-icon">✨</text>
+          <text class="m-card-title">本月健康建议</text>
+        </view>
+        <view wx:for="{{report.suggestions}}" wx:key="index" class="suggest-item">
+          <text class="suggest-dot">·</text>
+          <text class="suggest-text">{{item}}</text>
+        </view>
+      </view>
+
+    </view>
+
+  </block>
+
+  <view style="height: 60rpx;"></view>
+
+</scroll-view>

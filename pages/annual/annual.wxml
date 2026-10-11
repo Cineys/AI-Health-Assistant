@@ -1,0 +1,166 @@
+<!-- pages/annual/annual.wxml -->
+<scroll-view class="annual-root" scroll-y>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="state-wrap">
+    <text class="state-icon">⏳</text>
+    <text class="state-text">{{regenerating ? 'AI 正在重新生成年度总结...' : 'AI 正在生成年度总结...'}}</text>
+  </view>
+
+  <!-- 错误态 -->
+  <view wx:elif="{{errorMsg}}" class="state-wrap">
+    <text class="state-icon">😕</text>
+    <text class="state-text">{{errorMsg}}</text>
+    <view class="retry-btn" bindtap="retry">重新生成</view>
+  </view>
+
+  <!-- 报告内容 -->
+  <block wx:elif="{{report}}">
+
+    <!-- 头部 -->
+    <view class="annual-header">
+      <text class="annual-header-icon">📅</text>
+      <view class="annual-header-info">
+        <text class="annual-header-title">年度健康洞察</text>
+        <text class="annual-header-date">生成时间：{{report.generated_at}}</text>
+      </view>
+      <view class="regen-btn" bindtap="regenerate">
+        <text class="regen-btn-text">重新生成</text>
+      </view>
+    </view>
+
+    <view class="annual-body">
+
+      <!-- 年度概述 -->
+      <view class="a-card">
+        <view class="a-card-header">
+          <text class="a-card-icon">🌟</text>
+          <text class="a-card-title">年度健康概述</text>
+        </view>
+        <text class="a-card-content">{{report.year_summary || '—'}}</text>
+      </view>
+
+      <!-- 健康评分 -->
+      <view class="a-card score-card">
+        <view class="a-card-header">
+          <text class="a-card-icon">🏅</text>
+          <text class="a-card-title">年度健康评分</text>
+        </view>
+        <view class="score-wrap">
+          <text class="score-num">{{report.health_score || 0}}</text>
+          <text class="score-unit">分</text>
+        </view>
+        <view class="score-bar-bg">
+          <view class="score-bar-fill" style="width: {{report.health_score || 0}}"></view>
+        </view>
+      </view>
+
+      <!-- 打卡数据 -->
+      <view class="a-card">
+        <view class="a-card-header">
+          <text class="a-card-icon">📆</text>
+          <text class="a-card-title">打卡坚持情况</text>
+        </view>
+        <view class="stats-grid">
+          <view class="stat-cell">
+            <text class="stat-num">{{report.total_checkins}}</text>
+            <text class="stat-label">全年打卡</text>
+          </view>
+          <view class="stat-cell">
+            <text class="stat-num">{{report.checkin_rate}}%</text>
+            <text class="stat-label">打卡率</text>
+          </view>
+          <view class="stat-cell">
+            <text class="stat-num">{{report.max_streak}}</text>
+            <text class="stat-label">最长连续</text>
+          </view>
+          <view class="stat-cell">
+            <text class="stat-num">{{report.total_visits}}</text>
+            <text class="stat-label">全年问诊</text>
+          </view>
+        </view>
+        <text class="a-card-content" style="margin-top: 20rpx;">{{report.checkin_insight || '—'}}</text>
+      </view>
+
+      <!-- 情绪趋势 -->
+      <view class="a-card a-card-mood">
+        <view class="a-card-header">
+          <text class="a-card-icon">📈</text>
+          <text class="a-card-title">全年情绪走势</text>
+        </view>
+        <!-- 最佳 / 最低谷月份 -->
+        <view class="month-highlight-row">
+          <view class="month-tag month-best">
+            <text class="month-tag-label">😊 情绪最佳</text>
+            <text class="month-tag-val">{{report.best_month}}</text>
+          </view>
+          <view class="month-tag month-worst">
+            <text class="month-tag-label">😔 情绪低谷</text>
+            <text class="month-tag-val">{{report.worst_month}}</text>
+          </view>
+        </view>
+        <!-- 月度迷你条形图 -->
+        <view class="monthly-bars">
+          <view
+            wx:for="{{report.monthly_averages}}"
+            wx:key="month"
+            class="bar-wrap"
+          >
+            <view
+              class="bar-fill"
+              style="height: {{item.avg !== null ? (item.avg / 4 * 80 + 10) : 4}}rpx; opacity: {{item.avg !== null ? 1 : 0.2}};"
+            ></view>
+            <text class="bar-label">{{item.month.replace('月','')}}</text>
+          </view>
+        </view>
+        <!-- 高频情绪 -->
+        <view class="emotion-tags">
+          <view wx:for="{{report.top_emotions}}" wx:key="index" class="emotion-tag">
+            <text>{{item}}</text>
+          </view>
+        </view>
+        <text class="a-card-content" style="margin-top: 20rpx;">{{report.mood_trend_insight || '—'}}</text>
+      </view>
+
+      <!-- 生理健康 -->
+      <view class="a-card a-card-physical">
+        <view class="a-card-header">
+          <text class="a-card-icon">💪</text>
+          <text class="a-card-title">生理健康年度总结</text>
+        </view>
+        <!-- 高频主诉 -->
+        <view wx:if="{{report.top_complaints.length > 0}}" class="complaint-tags">
+          <view wx:for="{{report.top_complaints}}" wx:key="index" class="complaint-tag">
+            <text>{{item}}</text>
+          </view>
+        </view>
+        <text class="a-card-content" style="margin-top: 16rpx;">{{report.body_summary || '—'}}</text>
+      </view>
+
+      <!-- 心身洞察 -->
+      <view class="a-card a-card-psycho">
+        <view class="a-card-header">
+          <text class="a-card-icon">🧠</text>
+          <text class="a-card-title">心身关联年度洞察</text>
+        </view>
+        <text class="a-card-content">{{report.annual_insight || '—'}}</text>
+      </view>
+
+      <!-- 来年建议 -->
+      <view class="a-card a-card-suggest">
+        <view class="a-card-header">
+          <text class="a-card-icon">🎯</text>
+          <text class="a-card-title">来年健康建议</text>
+        </view>
+        <view wx:for="{{report.suggestions}}" wx:key="index" class="suggest-item">
+          <text class="suggest-index">{{index + 1}}</text>
+          <text class="suggest-text">{{item}}</text>
+        </view>
+      </view>
+
+    </view>
+  </block>
+
+  <view style="height: 60rpx;"></view>
+
+</scroll-view>

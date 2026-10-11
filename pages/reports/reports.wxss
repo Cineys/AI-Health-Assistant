@@ -1,0 +1,135 @@
+/* pages/reports/reports.wxss */
+
+.reports-root {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #EDEAFF 0%, #F5F4FF 50%, #EAF0FF 100%);
+  padding: 0 0 80rpx;
+}
+
+/* ===== 筛选栏 ===== */
+.filter-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16rpx;
+  padding: 24rpx 32rpx;
+}
+
+.date-picker-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 100rpx;
+  padding: 18rpx 28rpx;
+  box-shadow: 0 4rpx 16rpx rgba(123, 104, 238, 0.1);
+  flex: 1;
+}
+
+.date-picker-icon {
+  font-size: 28rpx;
+}
+
+.date-picker-text {
+  font-size: 26rpx;
+  color: #4A4870;
+  font-weight: 500;
+}
+
+.clear-btn {
+  background: rgba(123, 104, 238, 0.12);
+  border-radius: 100rpx;
+  padding: 18rpx 28rpx;
+  font-size: 24rpx;
+  color: #7B68EE;
+  font-weight: 600;
+}
+
+/* ===== 状态占位 ===== */
+.state-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+  gap: 20rpx;
+}
+
+.state-icon {
+  font-size: 72rpx;
+}
+
+.state-text {
+  font-size: 28rpx;
+  color: #9A98C0;
+}
+
+/* ===== 列表 ===== */
+.list-wrap {
+  padding: 0 32rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.report-card {
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 24rpx;
+  padding: 28rpx 24rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(123, 104, 238, 0.08);
+}
+
+.card-left {
+  font-size: 44rpx;
+  flex-shrink: 0;
+}
+
+.card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.card-complaint {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #2D2B55;
+  line-height: 1.4;
+}
+
+.card-date {
+  font-size: 22rpx;
+  color: #9A98C0;
+}
+
+.card-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10rpx;
+  flex-shrink: 0;
+}
+
+.type-badge {
+  font-size: 18rpx;
+  border-radius: 100rpx;
+  padding: 4rpx 14rpx;
+  font-weight: 600;
+}
+
+.type-monthly {
+  background: rgba(255, 184, 48, 0.15);
+  color: #B87A00;
+}
+
+.card-arrow {
+  font-size: 36rpx;
+  color: #C0BEDD;
+  font-weight: 300;
+}

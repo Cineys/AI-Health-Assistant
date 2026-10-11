@@ -1,0 +1,254 @@
+<!-- pages/report/report.wxml -->
+<scroll-view class="report-root" scroll-y id="report-scroll">
+
+  <!-- ===== 报告头部 ===== -->
+  <view class="report-header">
+    <view class="header-logo">
+      <text class="header-logo-icon">🏥</text>
+    </view>
+    <view class="header-info">
+      <text class="header-title">AI 辅助问诊摘要</text>
+      <text class="header-date">生成时间：{{report.generated_at}}</text>
+    </view>
+  </view>
+
+  <!-- ===== 免责横幅 ===== -->
+  <view class="disclaimer-banner">
+    <text class="disclaimer-text">⚠️ 本报告由 AI 自动生成，仅供就医参考，不构成医疗诊断，最终诊断请以医生意见为准。</text>
+  </view>
+
+  <!-- ===== Tab 切换（仅标准报告显示）===== -->
+  <view class="tab-bar" wx:if="{{report.report_type !== 'monthly'}}">
+    <view class="tab-item {{activeTab==='patient'?'tab-active':''}}" bindtap="switchTab" data-tab="patient">
+      <text>患者版</text>
+    </view>
+    <view class="tab-item {{activeTab==='doctor'?'tab-active':''}}" bindtap="switchTab" data-tab="doctor">
+      <text>医生版</text>
+    </view>
+  </view>
+
+  <!-- ===== 报告正文 ===== -->
+  <view class="report-body">
+
+    <!-- ── 年度报告视图 ── -->
+    <block wx:if="{{report.report_type === 'annual'}}">
+
+      <view class="section-card score-card-inline">
+        <view class="section-header-row">
+          <text class="section-icon">🏅</text>
+          <text class="section-label">年度健康评分</text>
+        </view>
+        <text class="score-big">{{report.health_score || 0}}<text class="score-unit-sm">分</text></text>
+      </view>
+
+      <view class="section-card">
+        <view class="section-header-row">
+          <text class="section-icon">🌟</text>
+          <text class="section-label">年度健康概述</text>
+        </view>
+        <text class="section-content">{{report.year_summary || '—'}}</text>
+      </view>
+
+      <view class="section-card">
+        <view class="section-header-row">
+          <text class="section-icon">📈</text>
+          <text class="section-label">全年情绪趋势</text>
+        </view>
+        <text class="section-content">{{report.mood_trend_insight || '—'}}</text>
+      </view>
+
+      <view class="section-card">
+        <view class="section-header-row">
+          <text class="section-icon">💪</text>
+          <text class="section-label">生理健康年度总结</text>
+        </view>
+        <text class="section-content">{{report.body_summary || '—'}}</text>
+      </view>
+
+      <view class="section-card section-psycho">
+        <view class="section-header-row">
+          <text class="section-icon">🧠</text>
+          <text class="section-label">心身关联年度洞察</text>
+          <text class="badge-ai">AI 分析</text>
+        </view>
+        <text class="section-content">{{report.annual_insight || '—'}}</text>
+      </view>
+
+      <view class="section-card section-recommend">
+        <view class="section-header-row">
+          <text class="section-icon">🎯</text>
+          <text class="section-label">来年健康建议</text>
+        </view>
+        <view wx:for="{{report.suggestions}}" wx:key="index" class="hpi-row">
+          <text class="hpi-value">{{index + 1}}. {{item}}</text>
+        </view>
+      </view>
+
+    </block>
+
+    <!-- ── 月度报告视图 ── -->
+    <block wx:elif="{{report.report_type === 'monthly'}}">
+
+      <view class="section-card">
+        <view class="section-header-row">
+          <text class="section-icon">🌟</text>
+          <text class="section-label">整体健康概述</text>
+        </view>
+        <text class="section-content">{{report.summary || '—'}}</text>
+      </view>
+
+      <view class="section-card">
+        <view class="section-header-row">
+          <text class="section-icon">😊</text>
+          <text class="section-label">情绪健康分析</text>
+        </view>
+        <text class="section-content">{{report.mood_insight || '—'}}</text>
+      </view>
+
+      <view class="section-card">
+        <view class="section-header-row">
+          <text class="section-icon">💪</text>
+          <text class="section-label">生理健康趋势</text>
+        </view>
+        <text class="section-content">{{report.physical_trend || '—'}}</text>
+      </view>
+
+      <view class="section-card section-psycho">
+        <view class="section-header-row">
+          <text class="section-icon">🧠</text>
+          <text class="section-label">心身关联分析</text>
+          <text class="badge-ai">AI 分析</text>
+        </view>
+        <text class="section-content">{{report.psychosomatic_link || '—'}}</text>
+      </view>
+
+      <view class="section-card section-recommend">
+        <view class="section-header-row">
+          <text class="section-icon">✨</text>
+          <text class="section-label">本月健康建议</text>
+        </view>
+        <view wx:for="{{report.suggestions}}" wx:key="index" class="hpi-row">
+          <text class="hpi-value">· {{item}}</text>
+        </view>
+      </view>
+
+    </block>
+
+    <!-- ── 标准报告视图 ── -->
+    <block wx:else>
+
+      <!-- 主诉（两个 tab 都展示） -->
+      <view class="section-card">
+        <view class="section-header-row">
+          <text class="section-icon">💬</text>
+          <text class="section-label">主诉</text>
+        </view>
+        <text class="section-content chief">{{report.chief_complaint || '—'}}</text>
+      </view>
+
+      <!-- 现病史（仅患者版） -->
+      <view class="section-card" wx:if="{{activeTab==='patient'}}">
+        <view class="section-header-row">
+          <text class="section-icon">📋</text>
+          <text class="section-label">现病史</text>
+        </view>
+        <view class="hpi-row">
+          <text class="hpi-label">起病诱因</text>
+          <text class="hpi-value">{{report.history_of_present_illness.onset || '未提及'}}</text>
+        </view>
+        <view class="hpi-row">
+          <text class="hpi-label">症状特点</text>
+          <text class="hpi-value">{{report.history_of_present_illness.characteristics || '—'}}</text>
+        </view>
+        <view class="hpi-row">
+          <text class="hpi-label">伴随症状</text>
+          <text class="hpi-value">{{report.history_of_present_illness.associated_symptoms || '无'}}</text>
+        </view>
+      </view>
+
+      <!-- 基础排查（仅患者版） -->
+      <view class="section-card" wx:if="{{activeTab==='patient'}}">
+        <view class="section-header-row">
+          <text class="section-icon">🔍</text>
+          <text class="section-label">基础排查</text>
+        </view>
+        <view class="hpi-row">
+          <text class="hpi-label">既往史</text>
+          <text class="hpi-value">{{report.essential_screenings.past_medical_history || '未提及'}}</text>
+        </view>
+        <view class="hpi-row">
+          <text class="hpi-label">用药史</text>
+          <text class="hpi-value">{{report.essential_screenings.medication_history || '未提及'}}</text>
+        </view>
+        <view class="hpi-row">
+          <text class="hpi-label">过敏史</text>
+          <text class="hpi-value">{{report.essential_screenings.allergies || '未提及'}}</text>
+        </view>
+      </view>
+
+      <!-- 重点关注（仅患者版） -->
+      <view class="section-card section-highlight" wx:if="{{activeTab==='patient'}}">
+        <view class="section-header-row">
+          <text class="section-icon">🚩</text>
+          <text class="section-label highlight-label">重点关注 / 异常指征</text>
+          <text class="badge-ai">AI 分析</text>
+        </view>
+        <text class="section-content highlight-content">{{report.clinical_flags || '—'}}</text>
+      </view>
+
+      <!-- 就医指导 -->
+      <view class="section-card section-recommend" wx:if="{{activeTab==='patient'}}">
+        <view class="section-header-row">
+          <text class="section-icon">🏥</text>
+          <text class="section-label">就医指导</text>
+        </view>
+        <text class="section-content">{{report.recommendations || '—'}}</text>
+      </view>
+
+      <!-- 患者科普建议 -->
+      <view class="section-card section-patient" wx:if="{{activeTab==='patient' && report.patient_report}}">
+        <view class="section-header-row">
+          <text class="section-icon">💡</text>
+          <text class="section-label">健康小贴士</text>
+          <text class="badge-ai">AI 建议</text>
+        </view>
+        <text class="section-content">{{report.patient_report}}</text>
+      </view>
+
+      <!-- 心身分析 -->
+      <view class="section-card section-psycho" wx:if="{{activeTab==='patient' && report.psychosomatic_analysis}}">
+        <view class="section-header-row">
+          <text class="section-icon">🧠</text>
+          <text class="section-label">心身关联分析</text>
+          <text class="badge-ai">AI 分析</text>
+        </view>
+        <text class="section-content">{{report.psychosomatic_analysis}}</text>
+      </view>
+
+      <!-- 医生版内容 -->
+      <view class="section-card section-doctor" wx:if="{{activeTab==='doctor'}}">
+        <view class="section-header-row">
+          <text class="section-icon">🩺</text>
+          <text class="section-label">临床摘要</text>
+          <text class="badge-ai">专业版</text>
+        </view>
+        <text class="section-content">{{report.doctor_report || '暂无专业版内容，请重新生成报告。'}}</text>
+      </view>
+
+    </block>
+
+  </view>
+
+  <!-- ===== 操作按钮 ===== -->
+  <view class="action-row">
+    <button class="action-btn btn-save" bindtap="saveReport">
+      <text>保存到相册</text>
+    </button>
+    <button class="action-btn btn-share" open-type="share">
+      <text>分享给医生</text>
+    </button>
+  </view>
+
+  <view style="height: 60rpx;"></view>
+
+</scroll-view>

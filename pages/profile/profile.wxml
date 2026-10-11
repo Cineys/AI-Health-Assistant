@@ -1,0 +1,298 @@
+<!-- pages/profile/profile.wxml -->
+<view class="profile-root">
+<view class="profile-content">
+
+  <!-- ===== 顶部用户信息卡片 ===== -->
+  <view class="user-card card">
+    <view class="user-info-row">
+      <!-- 头像：点击可更换 emoji -->
+      <view class="user-avatar-wrap" bindtap="editAvatar">
+        <text class="user-avatar-text">{{avatarEmoji || nickname[0] || '健'}}</text>
+        <view class="avatar-badge">✏️</view>
+      </view>
+      <view class="user-details">
+        <!-- 昵称：点击可编辑 -->
+        <view class="user-name-row" bindtap="editName">
+          <text class="user-name">{{nickname}}</text>
+          <text class="name-edit-icon">✏️</text>
+        </view>
+        <text class="user-sub">健康管理 · 已坚持 {{streak}} 天</text>
+        <view class="user-level">
+          <text class="level-tag">活力达人</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 统计行 -->
+    <view class="stats-row">
+      <view class="stat-item">
+        <text class="stat-num">{{stats.records}}</text>
+        <text class="stat-label">打卡记录</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-num">{{stats.chats}}</text>
+        <text class="stat-label">问诊次数</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-num">{{stats.reports}}</text>
+        <text class="stat-label">健康报告</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 活力指数热力图（GitHub 风格） ===== -->
+  <view class="section-wrap">
+    <view class="section-header">
+      <text class="section-title">📊 活力指数</text>
+      <!-- 右侧图例：0% → 100%+ -->
+      <view class="heatmap-legend-row">
+        <text class="legend-pct">0%</text>
+        <view class="heat-cell-mini" style="background: rgba(200,200,220,0.25);"></view>
+        <view class="heat-cell-mini" style="background: rgba(123,104,238,0.20);"></view>
+        <view class="heat-cell-mini" style="background: rgba(123,104,238,0.50);"></view>
+        <view class="heat-cell-mini" style="background: rgba(123,104,238,0.80);"></view>
+        <view class="heat-cell-mini" style="background: rgba(123,104,238,1);"></view>
+        <text class="legend-pct">100%+</text>
+      </view>
+    </view>
+
+    <view class="heatmap-card card">
+      <scroll-view
+        scroll-x
+        enhanced="true"
+        show-scrollbar="{{false}}"
+        class="heatmap-scroll"
+        scroll-left="{{heatmapScrollLeft}}"
+      >
+        <view class="heatmap-weeks">
+          <!-- 每列 = 一周，从周一(上)到周日(下) -->
+          <view
+            class="heatmap-col"
+            wx:for="{{heatmapCols}}"
+            wx:key="colIdx"
+            wx:for-index="colIdx"
+            wx:for-item="col"
+          >
+            <view
+              class="heat-cell {{cell.hasMood ? 'heat-cell-tap' : ''}}"
+              style="background: {{cell.color}};"
+              wx:for="{{col.cells}}"
+              wx:key="key"
+              wx:for-index="rowIdx"
+              wx:for-item="cell"
+              data-col="{{colIdx}}"
+              data-row="{{rowIdx}}"
+              bindtap="onCellTap"
+            ></view>
+            <!-- 月份标签（仅月份首周显示） -->
+            <text class="heatmap-month-label">{{col.monthLabel}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- ===== 情绪趋势折线图 ===== -->
+  <view class="section-wrap">
+    <view class="section-header">
+      <text class="section-title">📈 情绪趋势</text>
+      <!-- 7 / 30 天切换 -->
+      <view class="trend-toggle">
+        <view
+          class="toggle-btn {{trendRange===7?'toggle-active':''}}"
+          bindtap="switchRange" data-range="7"
+        >7天</view>
+        <view
+          class="toggle-btn {{trendRange===30?'toggle-active':''}}"
+          bindtap="switchRange" data-range="30"
+        >30天</view>
+      </view>
+    </view>
+
+    <view class="trend-card card">
+      <!-- 有数据：Canvas 图表（弹层打开时隐藏，避免原生组件层级穿透） -->
+      <canvas wx:if="{{!trendEmpty && !anyPopupOpen}}" type="2d" id="trendChart" class="trend-canvas"></canvas>
+      <!-- 无数据 -->
+      <view wx:else class="trend-empty">
+        <text class="trend-empty-icon">🌱</text>
+        <text class="trend-empty-text">快去打卡，让趋势图生长吧</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 膳食调理卡片 ===== -->
+  <view class="section-wrap">
+    <text class="section-title">🥗 今日膳食</text>
+    <view class="diet-ring-card" bindtap="goToDiet">
+
+      <!-- 左：进度环 Canvas（弹层打开时隐藏，避免原生组件层级穿透） -->
+      <view class="diet-ring-wrap">
+        <canvas wx:if="{{!anyPopupOpen}}" type="2d" id="dietRing" class="diet-ring-canvas"></canvas>
+      </view>
+
+      <!-- 中：标签组 -->
+      <view class="diet-tags-wrap">
+        <text class="diet-card-title">今日调理建议</text>
+        <view class="diet-tags-row">
+          <view wx:for="{{dietCard.yiTags}}" wx:key="index" class="diet-tag diet-tag-yi">
+            <text>宜 {{item}}</text>
+          </view>
+          <view wx:for="{{dietCard.jiTags}}" wx:key="index" class="diet-tag diet-tag-ji">
+            <text>忌 {{item}}</text>
+          </view>
+        </view>
+        <text class="diet-card-hint">点击获取 AI 个性化建议 ›</text>
+      </view>
+
+    </view>
+  </view>
+
+  <!-- ===== 功能列表 ===== -->
+  <view class="section-wrap">
+    <text class="section-title">🗂 健康管理</text>
+    <view class="menu-card card">
+
+      <view class="menu-item" bindtap="goToReports">
+        <view class="menu-left">
+          <text class="menu-icon-bg" style="background: #EEE9FF;">📋</text>
+          <text class="menu-label">历史报告</text>
+        </view>
+        <view class="menu-right">
+          <text class="menu-badge">{{stats.reports}} 份</text>
+          <text class="menu-arrow">›</text>
+        </view>
+      </view>
+
+      <view class="menu-divider"></view>
+
+      <view class="menu-item" bindtap="goToMonthly">
+        <view class="menu-left">
+          <text class="menu-icon-bg" style="background: #FFF8E8;">📊</text>
+          <text class="menu-label">月度健康总结</text>
+        </view>
+        <view class="menu-right">
+          <text class="menu-arrow">›</text>
+        </view>
+      </view>
+
+      <view class="menu-divider"></view>
+
+      <view class="menu-item" bindtap="goToAnnual">
+        <view class="menu-left">
+          <text class="menu-icon-bg" style="background: #EEF4FF;">📅</text>
+          <text class="menu-label">年度健康报告</text>
+        </view>
+        <view class="menu-right">
+          <text class="menu-arrow">›</text>
+        </view>
+      </view>
+
+      <view class="menu-divider"></view>
+
+      <view class="menu-item" bindtap="goToSettings">
+        <view class="menu-left">
+          <text class="menu-icon-bg" style="background: #E8F5FF;">⚙️</text>
+          <text class="menu-label">设置</text>
+        </view>
+        <view class="menu-right">
+          <text class="menu-arrow">›</text>
+        </view>
+      </view>
+
+      <view class="menu-divider"></view>
+
+      <view class="menu-item" bindtap="goToAbout">
+        <view class="menu-left">
+          <text class="menu-icon-bg" style="background: #F0FFEE;">ℹ️</text>
+          <text class="menu-label">关于健康助手</text>
+        </view>
+        <view class="menu-right">
+          <text class="menu-arrow">›</text>
+        </view>
+      </view>
+
+    </view>
+  </view>
+
+  <!-- 免责声明底部 -->
+  <view class="bottom-disclaimer">
+    <text>本应用内容仅供参考，不构成医疗建议。</text>
+    <text>如有健康问题，请咨询专业医生。</text>
+  </view>
+
+  <view style="height: 40rpx;"></view>
+
+</view>
+</view>
+
+<!-- ===== 昵称编辑弹窗 ===== -->
+<view wx:if="{{showNameSheet}}" class="popup-overlay" bindtap="closeNameSheet">
+  <view class="popup-sheet" catchtap="">
+    <view class="popup-handle"></view>
+    <text class="popup-date">修改昵称</text>
+    <input
+      class="name-input"
+      value="{{nameInput}}"
+      bindinput="onNameInput"
+      placeholder="输入你的名字（最多12字）"
+      placeholder-class="name-input-placeholder"
+      maxlength="12"
+      focus="{{showNameSheet}}"
+      confirm-type="done"
+      bindconfirm="saveName"
+    />
+    <button class="popup-close-btn" bindtap="saveName">保存</button>
+    <button class="name-cancel-btn" bindtap="closeNameSheet">取消</button>
+  </view>
+</view>
+
+<!-- ===== 头像 Emoji 选择弹窗 ===== -->
+<view wx:if="{{showAvatarSheet}}" class="popup-overlay" bindtap="closeAvatarSheet">
+  <view class="popup-sheet" catchtap="">
+    <view class="popup-handle"></view>
+    <text class="popup-date">选择头像</text>
+    <view class="emoji-grid">
+      <view
+        wx:for="{{emojiList}}"
+        wx:key="index"
+        class="emoji-item {{avatarEmoji === item ? 'emoji-item-active' : ''}}"
+        bindtap="selectEmoji"
+        data-emoji="{{item}}"
+      >
+        <text class="emoji-text">{{item}}</text>
+      </view>
+    </view>
+    <button class="name-cancel-btn" style="margin-top: 16rpx;" bindtap="closeAvatarSheet">取消</button>
+  </view>
+</view>
+
+<!-- ===== 日记弹窗 ===== -->
+<view wx:if="{{showDayPopup}}" class="popup-overlay" bindtap="closePopup">
+  <view class="popup-sheet" catchtap="">
+    <view class="popup-handle"></view>
+    <text class="popup-date">{{popupDay.dateStr}}</text>
+    <block wx:if="{{popupDay.hasMood}}">
+      <view class="popup-mood-row">
+        <text class="popup-emoji">{{popupDay.emoji}}</text>
+        <view class="popup-mood-info">
+          <text class="popup-mood-label">{{popupDay.label}}</text>
+          <text class="popup-mood-hint">今日心情</text>
+        </view>
+      </view>
+      <view class="popup-diary-wrap">
+        <text wx:if="{{popupDay.diary}}" class="popup-diary-text">{{popupDay.diary}}</text>
+        <view wx:else class="popup-diary-empty">
+          <text class="popup-diary-empty-icon">✏️</text>
+          <text class="popup-diary-empty-text">这天没有留下随笔</text>
+        </view>
+      </view>
+    </block>
+    <view wx:else class="popup-no-record">
+      <text class="popup-no-record-icon">🌙</text>
+      <text class="popup-no-record-text">这天还没有打卡记录</text>
+    </view>
+    <button class="popup-close-btn" bindtap="closePopup">关闭</button>
+  </view>
+</view>

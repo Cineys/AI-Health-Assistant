@@ -1,0 +1,130 @@
+<!-- pages/chat/chat.wxml -->
+<view class="chat-root">
+
+  <!-- ===== 顶部横幅（根据模式切换） ===== -->
+  <view wx:if="{{mode === 'diet'}}" class="diet-banner">
+    <text class="banner-icon">🥗</text>
+    <text class="banner-text">膳食管家 · 根据你的近期状态给出今日饮食建议</text>
+  </view>
+  <view wx:else class="disclaimer-banner">
+    <text class="disclaimer-icon">⚠️</text>
+    <text class="disclaimer-text">本 AI 仅供参考，不替代专业医疗诊断。如有紧急情况请立即就医。</text>
+  </view>
+
+  <!-- ===== 聊天滚动区 ===== -->
+  <scroll-view
+    class="chat-scroll"
+    scroll-y
+    scroll-into-view="{{scrollToId}}"
+    enhanced
+    show-scrollbar="{{false}}"
+  >
+    <view class="chat-list">
+
+      <!-- 系统提示 -->
+      <view class="sys-msg">
+        <text wx:if="{{mode === 'diet'}}" class="sys-msg-text">🌿 膳食管家正在分析你的近期状态…</text>
+        <text wx:else class="sys-msg-text">👨‍⚕️ AI诊室已就绪，请描述您的症状</text>
+      </view>
+
+      <!-- 动态消息列表 -->
+      <block wx:for="{{messages}}" wx:key="id">
+
+        <!-- AI 消息 -->
+        <view wx:if="{{item.role === 'ai'}}" class="msg-row msg-ai">
+          <view class="ai-avatar">
+            <text class="ai-avatar-icon">🤖</text>
+          </view>
+          <view class="bubble-wrap">
+            <text class="sender-name">健康助手</text>
+            <view class="bubble bubble-ai">
+              <!-- 正在输入动画 -->
+              <view wx:if="{{item.typing && !item.content}}" class="typing-dots">
+                <view class="dot dot1"></view>
+                <view class="dot dot2"></view>
+                <view class="dot dot3"></view>
+              </view>
+              <text wx:else>{{item.content}}</text>
+            </view>
+            <text class="msg-time">{{item.time}}</text>
+          </view>
+        </view>
+
+        <!-- 用户消息 -->
+        <view wx:if="{{item.role === 'user'}}" class="msg-row msg-user">
+          <view class="bubble-wrap bubble-wrap-user">
+            <view class="bubble bubble-user">
+              <text>{{item.content}}</text>
+            </view>
+            <text class="msg-time msg-time-right">{{item.time}}</text>
+          </view>
+        </view>
+
+      </block>
+
+      <!-- 错误提示 -->
+      <view wx:if="{{errorMsg}}" class="error-tip">
+        <text>⚠️ {{errorMsg}}</text>
+      </view>
+
+      <!-- 滚动锚点（双锚点交替触发，避免值不变时 scroll-into-view 不生效） -->
+      <view id="msg-bottom"     class="msg-safe-bottom"></view>
+      <view id="msg-bottom-alt" class="msg-safe-bottom"></view>
+
+    </view>
+  </scroll-view>
+
+  <!-- ===== 生成报告按钮（仅 medical 模式，有对话记录后显示） ===== -->
+  <view wx:if="{{messages.length > 2 && mode !== 'diet'}}" class="report-bar">
+    <view class="report-btn {{generatingReport ? 'report-btn-loading' : ''}}" bindtap="generateReport">
+      <text class="report-btn-icon">📋</text>
+      <text class="report-btn-text">{{generatingReport ? '正在生成报告…' : '生成问诊报告'}}</text>
+    </view>
+  </view>
+
+  <!-- ===== 底部输入区 ===== -->
+  <view class="input-area-wrap">
+
+    <!-- 快捷标签 -->
+    <scroll-view class="quick-tags-scroll" scroll-x enable-flex>
+      <view class="quick-tags-inner">
+        <view
+          wx:for="{{quickTags}}"
+          wx:key="index"
+          class="quick-tag"
+          bindtap="fillTag"
+          data-tag="{{item}}"
+        >
+          <text>{{item}}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 输入框行 -->
+    <view class="input-row">
+      <view class="input-box">
+        <input
+          class="chat-input"
+          value="{{inputVal}}"
+          placeholder="{{isStreaming ? 'AI 正在回复中…' : (mode === 'diet' ? '问问今日饮食建议…' : '描述您的症状…')}}"
+          placeholder-class="input-placeholder"
+          bindinput="onInput"
+          confirm-type="send"
+          bindconfirm="sendMsg"
+          disabled="{{isStreaming}}"
+          adjust-position
+        />
+      </view>
+      <view
+        class="send-btn {{(inputVal && !isStreaming) ? 'send-btn-active' : ''}}"
+        bindtap="sendMsg"
+      >
+        <!-- 流式时显示停止图标 -->
+        <text wx:if="{{isStreaming}}" class="send-icon stop-icon">■</text>
+        <text wx:else class="send-icon">↑</text>
+      </view>
+    </view>
+
+  </view>
+
+</view>

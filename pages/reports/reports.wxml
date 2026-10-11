@@ -1,0 +1,53 @@
+<!-- pages/reports/reports.wxml -->
+<scroll-view class="reports-root" scroll-y>
+
+  <!-- ===== 日期筛选栏 ===== -->
+  <view class="filter-bar">
+    <picker mode="date" value="{{filterDate}}" bindchange="onDateChange">
+      <view class="date-picker-btn">
+        <text class="date-picker-icon">📅</text>
+        <text class="date-picker-text">{{filterDate || '按日期筛选'}}</text>
+      </view>
+    </picker>
+    <view wx:if="{{filterDate}}" class="clear-btn" bindtap="clearDate">
+      <text>清除</text>
+    </view>
+  </view>
+
+  <!-- ===== 加载中 ===== -->
+  <view wx:if="{{loading}}" class="state-wrap">
+    <text class="state-text">加载中...</text>
+  </view>
+
+  <!-- ===== 空状态 ===== -->
+  <view wx:elif="{{reports.length === 0}}" class="state-wrap">
+    <text class="state-icon">📭</text>
+    <text class="state-text">{{filterDate ? '该日期暂无报告' : '暂无历史报告'}}</text>
+  </view>
+
+  <!-- ===== 报告列表 ===== -->
+  <view wx:else class="list-wrap">
+    <view
+      wx:for="{{reports}}"
+      wx:key="id"
+      class="report-card"
+      bindtap="goToDetail"
+      data-id="{{item.id}}"
+    >
+      <view class="card-left">
+        <text class="card-icon">{{item.report_type === 'monthly' ? '📊' : '📋'}}</text>
+      </view>
+      <view class="card-body">
+        <text class="card-complaint">{{item.chief_complaint || '问诊报告'}}</text>
+        <text class="card-date">{{item.created_at}}</text>
+      </view>
+      <view class="card-right">
+        <text wx:if="{{item.report_type === 'monthly'}}" class="type-badge type-monthly">月度</text>
+        <text class="card-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view style="height: 60rpx;"></view>
+
+</scroll-view>

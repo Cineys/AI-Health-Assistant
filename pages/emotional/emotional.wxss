@@ -1,0 +1,250 @@
+/* pages/emotional/emotional.wxss */
+/* 继承 chat 的大部分样式，覆盖主题色为温暖紫粉色调 */
+
+.chat-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(160deg, #F0EAFF 0%, #F8F4FF 50%, #EAE8FF 100%);
+  overflow: hidden;
+}
+
+/* ===== 顶部横幅（温暖紫） ===== */
+.emotional-banner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: linear-gradient(90deg, rgba(240,234,255,0.95), rgba(232,228,255,0.95));
+  padding: 18rpx 28rpx;
+  gap: 14rpx;
+  border-bottom: 1rpx solid rgba(168, 156, 245, 0.15);
+  flex-shrink: 0;
+  backdrop-filter: blur(12px);
+}
+
+.banner-icon { font-size: 28rpx; flex-shrink: 0; }
+.banner-text { font-size: 21rpx; color: #7B68AA; line-height: 1.6; flex: 1; }
+
+/* ===== 膳食管家横幅（清新绿） ===== */
+.diet-banner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: linear-gradient(90deg, rgba(230,248,236,0.95), rgba(240,255,244,0.95));
+  padding: 18rpx 28rpx;
+  gap: 14rpx;
+  border-bottom: 1rpx solid rgba(82, 196, 122, 0.18);
+  flex-shrink: 0;
+  backdrop-filter: blur(12px);
+}
+.diet-banner .banner-icon { color: inherit; }
+.diet-banner .banner-text { color: #3A8A56; }
+
+/* ===== 聊天区（复用 chat.wxss 结构） ===== */
+.chat-scroll { flex: 1; overflow: hidden; }
+
+.chat-list {
+  padding: 28rpx 24rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 28rpx;
+}
+
+.sys-msg { display: flex; justify-content: center; animation: fadeIn 0.4s ease both; }
+
+.sys-msg-text {
+  font-size: 22rpx;
+  color: #B8B0D8;
+  background: rgba(255, 255, 255, 0.65);
+  padding: 10rpx 28rpx;
+  border-radius: 100rpx;
+  border: 1rpx solid rgba(168, 156, 245, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.msg-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16rpx;
+}
+
+.msg-ai   { animation: slideInLeft  0.3s cubic-bezier(0.22, 0.8, 0.4, 1) both; }
+.msg-user {
+  flex-direction: row-reverse;
+  animation: slideInRight 0.3s cubic-bezier(0.22, 0.8, 0.4, 1) both;
+}
+
+/* AI 头像 — 粉紫色 */
+.ai-avatar {
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2rpx solid rgba(255, 255, 255, 0.5);
+}
+
+.emotional-avatar {
+  background: linear-gradient(135deg, #C4A8FF, #E8A8E8);
+  box-shadow: 0 6rpx 16rpx rgba(196, 168, 255, 0.4);
+}
+
+.ai-avatar-icon { font-size: 38rpx; }
+
+.bubble-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  max-width: 70%;
+}
+
+.bubble-wrap-user { align-items: flex-end; }
+.sender-name { font-size: 21rpx; color: #C5C0E0; padding-left: 6rpx; }
+
+.bubble {
+  padding: 24rpx 30rpx;
+  border-radius: 28rpx;
+  font-size: 28rpx;
+  line-height: 1.8;
+}
+
+/* AI 气泡 — 温暖白 */
+.bubble-ai {
+  background: rgba(255, 255, 255, 0.90);
+  border: 1rpx solid rgba(255, 255, 255, 0.95);
+  border-top-left-radius: 8rpx;
+  color: #2D2B55;
+  box-shadow: 0 6rpx 24rpx rgba(168, 156, 245, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* 用户气泡 — 粉紫色 */
+.bubble-user-emotional {
+  background: linear-gradient(135deg, #A89CF5 0%, #C4A8FF 100%);
+  border-top-right-radius: 8rpx;
+  color: #fff;
+  box-shadow: 0 8rpx 24rpx rgba(168, 156, 245, 0.42);
+}
+
+.msg-time       { font-size: 20rpx; color: #CCC9E8; padding-left: 6rpx; }
+.msg-time-right { padding-left: 0; padding-right: 6rpx; }
+
+/* ===== 输入区 ===== */
+.emotional-input-wrap {
+  flex-shrink: 0;
+  background: rgba(248, 245, 255, 0.85);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border-top: 1rpx solid rgba(255, 255, 255, 0.75);
+  padding: 16rpx 24rpx 44rpx;
+  box-shadow: 0 -6rpx 32rpx rgba(168, 156, 245, 0.12);
+}
+
+.quick-tags-scroll { width: 100%; margin-bottom: 16rpx; white-space: nowrap; }
+
+.quick-tags-inner {
+  display: flex;
+  flex-direction: row;
+  gap: 14rpx;
+  padding: 4rpx 0;
+}
+
+/* 快捷标签 — 粉紫色调 */
+.emotional-tag {
+  flex-shrink: 0;
+  background: rgba(168, 156, 245, 0.10);
+  border: 1rpx solid rgba(168, 156, 245, 0.22);
+  border-radius: 100rpx;
+  padding: 12rpx 28rpx;
+  font-size: 24rpx;
+  color: #9B8BF5;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: transform 0.12s;
+}
+
+.emotional-tag:active {
+  transform: scale(0.94);
+  background: rgba(168, 156, 245, 0.18);
+}
+
+.input-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.input-box {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 100rpx;
+  border: 1.5rpx solid rgba(168, 156, 245, 0.18);
+  padding: 20rpx 36rpx;
+  box-shadow: 0 2rpx 12rpx rgba(168, 156, 245, 0.07);
+}
+
+.chat-input        { font-size: 28rpx; color: #2D2B55; width: 100%; }
+.input-placeholder { color: #CACAE8; font-size: 28rpx; }
+
+.send-btn {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 50%;
+  background: #E8E0FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.send-btn:active { transform: scale(0.90); }
+
+.send-btn-emotional {
+  background: linear-gradient(135deg, #A89CF5, #C4A8FF);
+  box-shadow: 0 6rpx 20rpx rgba(168, 156, 245, 0.45);
+}
+
+.send-icon { font-size: 36rpx; color: #fff; font-weight: 700; line-height: 1; }
+.stop-icon { font-size: 26rpx; }
+
+/* ===== 打点动画 ===== */
+.typing-dots {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10rpx;
+  padding: 6rpx 0;
+}
+
+.dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #C4A8FF;
+  animation: dotBounce 1.3s infinite ease-in-out;
+}
+
+.dot2 { animation-delay: 0.22s; }
+.dot3 { animation-delay: 0.44s; }
+
+@keyframes dotBounce {
+  0%, 75%, 100% { transform: scale(0.55); opacity: 0.35; }
+  38%           { transform: scale(1.15); opacity: 1; }
+}
+
+.error-tip {
+  text-align: center;
+  font-size: 24rpx;
+  color: #E57373;
+  background: rgba(229, 115, 115, 0.07);
+  border: 1rpx solid rgba(229, 115, 115, 0.18);
+  border-radius: 18rpx;
+  padding: 16rpx 24rpx;
+  margin: 0 16rpx;
+}

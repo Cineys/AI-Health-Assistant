@@ -1,0 +1,110 @@
+<!-- pages/emotional/emotional.wxml -->
+<view class="chat-root">
+
+  <!-- ===== 顶部横幅（根据模式切换） ===== -->
+  <view wx:if="{{mode === 'diet'}}" class="diet-banner">
+    <text class="banner-icon">🥗</text>
+    <text class="banner-text">膳食管家 · 根据你的近期状态给出今日饮食建议</text>
+  </view>
+  <view wx:else class="emotional-banner">
+    <text class="banner-icon">💜</text>
+    <text class="banner-text">这里是安全的空间，我会陪着你。你说的一切都只属于你们俩。</text>
+  </view>
+
+  <!-- ===== 聊天滚动区 ===== -->
+  <scroll-view
+    class="chat-scroll"
+    scroll-y
+    scroll-into-view="{{scrollToId}}"
+    scroll-with-animation
+    enhanced
+    show-scrollbar="{{false}}"
+  >
+    <view class="chat-list">
+
+      <view class="sys-msg">
+        <text class="sys-msg-text">💬 心理疏导模式 · 我在这里陪着你</text>
+      </view>
+
+      <block wx:for="{{messages}}" wx:key="id">
+
+        <!-- AI 消息 -->
+        <view wx:if="{{item.role === 'ai'}}" class="msg-row msg-ai">
+          <view class="ai-avatar emotional-avatar">
+            <text class="ai-avatar-icon">🌸</text>
+          </view>
+          <view class="bubble-wrap">
+            <text class="sender-name">健康助手</text>
+            <view class="bubble bubble-ai bubble-emotional">
+              <view wx:if="{{item.typing && !item.content}}" class="typing-dots">
+                <view class="dot dot1"></view>
+                <view class="dot dot2"></view>
+                <view class="dot dot3"></view>
+              </view>
+              <text wx:else>{{item.content}}</text>
+            </view>
+            <text class="msg-time">{{item.time}}</text>
+          </view>
+        </view>
+
+        <!-- 用户消息 -->
+        <view wx:if="{{item.role === 'user'}}" class="msg-row msg-user">
+          <view class="bubble-wrap bubble-wrap-user">
+            <view class="bubble bubble-user bubble-user-emotional">
+              <text>{{item.content}}</text>
+            </view>
+            <text class="msg-time msg-time-right">{{item.time}}</text>
+          </view>
+        </view>
+
+      </block>
+
+      <view wx:if="{{errorMsg}}" class="error-tip">
+        <text>⚠️ {{errorMsg}}</text>
+      </view>
+
+      <view id="msg-bottom" class="msg-safe-bottom"></view>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 快捷情绪标签 ===== -->
+  <view class="input-area-wrap emotional-input-wrap">
+    <scroll-view class="quick-tags-scroll" scroll-x enable-flex>
+      <view class="quick-tags-inner">
+        <view
+          wx:for="{{quickTags}}"
+          wx:key="index"
+          class="quick-tag emotional-tag"
+          bindtap="fillTag"
+          data-tag="{{item}}"
+        >
+          <text>{{item}}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="input-row">
+      <view class="input-box">
+        <input
+          class="chat-input"
+          value="{{inputVal}}"
+          placeholder="{{isStreaming ? 'AI 正在回复中…' : '说说你现在的感受…'}}"
+          placeholder-class="input-placeholder"
+          bindinput="onInput"
+          confirm-type="send"
+          bindconfirm="sendMsg"
+          disabled="{{isStreaming}}"
+          adjust-position
+        />
+      </view>
+      <view
+        class="send-btn {{(inputVal && !isStreaming) ? 'send-btn-active send-btn-emotional' : ''}}"
+        bindtap="sendMsg"
+      >
+        <text wx:if="{{isStreaming}}" class="send-icon stop-icon">■</text>
+        <text wx:else class="send-icon">↑</text>
+      </view>
+    </view>
+  </view>
+
+</view>

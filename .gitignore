@@ -1,0 +1,63 @@
+# ── 本地数据库文件（禁止追踪） ─────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── 环境变量（含密钥，禁止上传） ──────────────────────
+.env
+.env.*
+!.env.example
+
+# ── 本机/个人开发工具配置 ─────────────────────────────
+project.private.config.json
+.claude/settings.local.json
+.idea/
+*.iml
+
+# ── Python ────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# ── 模型缓存（体积大，勿入库） ────────────────────────
+backend-server/chroma_db_huatuo/
+backend-server/chroma_db_test/
+*.bin
+*.safetensors
+
+# ── 第三方数据集（许可证未核实，禁止分发；本地保留） ──
+# 仅排除已确认的数据文件，不使用 *.jsonl 全局规则
+huatuo_sample.jsonl
+huatuo_text_test_subset.jsonl
+backend-server/huatuo_sample.jsonl
+backend-server/testset.jsonl
+
+# ── 答辩 / 演示材料（本地保留，不入库） ────────────────
+generate_ppt.py
+slides_v3_codex.html
+huitu.py
+*.pptx
+
+# ── 原始产品截图（本地保留，不入库） ──────────────────
+# 仅排除原始截图目录；用于 README 的精选压缩图在 docs/screenshots/，不受影响
+小程序截图/
+
+# ── 生成产物与临时文件 ────────────────────────────────
+outputs/
+*.tar
+*.tar.gz
+*.zip
+*.log
+*.tmp
+
+# ── 浏览器另存的网页缓存 ─────────────────────────────
+test_datasets.jsonl · FreedomIntelligence_huatuo26M-testdatasets at main.html
+test_datasets.jsonl · FreedomIntelligence_huatuo26M-testdatasets at main_files/
+
+# ── macOS ─────────────────────────────────────────────
+.DS_Store
