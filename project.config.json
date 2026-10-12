@@ -9,18 +9,10 @@
       { "type": "folder", "value": "backend-server" },
       { "type": "folder", "value": "outputs" },
       { "type": "folder", "value": "architecture-docs" },
-      { "type": "folder", "value": "test_datasets.jsonl · FreedomIntelligence_huatuo26M-testdatasets at main_files" },
-      { "type": "file",   "value": "test_datasets.jsonl · FreedomIntelligence_huatuo26M-testdatasets at main.html" },
       { "type": "file",   "value": "data.py" },
       { "type": "file",   "value": "download_subset.py" },
-      { "type": "file",   "value": "generate_ppt.py" },
-      { "type": "file",   "value": "huitu.py" },
       { "type": "file",   "value": "huatuo_sample.jsonl" },
       { "type": "file",   "value": "huatuo_text_test_subset.jsonl" },
-      { "type": "file",   "value": "slides_v3_codex.html" },
-      { "type": "file",   "value": "IMG_4221.jpg" },
-      { "type": "file",   "value": "PRD_v2.md" },
-      { "type": "file",   "value": "prd.md" },
       { "type": "file",   "value": "PROJECT_DOCUMENTATION.md" }
     ],
     "include": []

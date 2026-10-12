@@ -1,4 +1,4 @@
-# 健康助手（Health Companion）— 项目文档（详尽版）
+# AI Health Assistant（AI 个人健康助手）— 项目文档（详尽版）
 
 > **文件位置**：本仓库根目录下的 `PROJECT_DOCUMENTATION.md`（与 `app.json` 同级）。  
 > 若在 IDE 中看不到，请在资源管理器中打开项目根文件夹，或按文件名搜索 `PROJECT_DOCUMENTATION`。
@@ -34,10 +34,10 @@
 - **AI 诊室（医疗向）**：用户描述症状，AI 以问诊助手身份收集信息（不做确定诊断），可结合 **华佗类医学问答语料** 做检索增强（RAG），支持 **流式回复**。  
 - **就诊参考报告**：将对话整理为结构化 JSON 报告，含 **患者可读版** 与 **医生向专业摘要**，并可将近 7 天心情用于 **心身关联** 说明。  
 - **心情打卡**：5 档心情 + 可选日记；**本地优先**（`wx.storage`），登录后同步服务端。  
-- **心理疏导 / 膳食相关对话**：独立页面，走 **非 RAG** 的通义千问对话（`mode=emotional`）；膳食入口会组装近 7 天心情上下文（见前端说明）。  
+- **心理疏导 / 膳食相关对话**：独立页面，两者各走**独立分支**（心理疏导 `mode=emotional`、膳食 `mode=diet`），使用各自的 system prompt，均**不进入医疗意图分类，也不进行 RAG 检索**；膳食入口会组装近 7 天心情上下文（见前端说明）。
 - **历史报告 / 月度总结 / 年度总结**：依赖登录与 MySQL 中存储的数据。
 
-英文暂定名：**Health Companion**。
+英文名：**AI Health Assistant**（中文名「AI 个人健康助手」）。
 
 ### 1.2 产品边界（合规）
 
@@ -75,7 +75,7 @@ V1 与 V2 两版产品需求文档（`prd.md` / `PRD_v2.md`）记录了本项目
 
 ### 2.3 `requirements.txt` 主要包（`backend-server/requirements.txt`）
 
-`fastapi`、`uvicorn[standard]`、`dashscope`、`chromadb`、`sentence-transformers`、`pydantic`、`python-dotenv`、`sqlalchemy`、`pymysql`、`python-jose[cryptography]`、`httpx`、`torch`、`rank_bm25`、`jieba`（另含 `langchain` 等，核心 RAG 路径以 `app.py` 直连 Chroma 为准）。
+`fastapi`、`uvicorn[standard]`、`dashscope`、`chromadb`、`sentence-transformers`、`pydantic`、`python-dotenv`、`sqlalchemy`、`pymysql`、`python-jose[cryptography]`、`httpx`、`torch`、`rank_bm25`、`jieba`（核心 RAG 链路由 `app.py` 直接调用 ChromaDB 自行编排，不依赖 LangChain）。
 
 ---
 
@@ -305,7 +305,7 @@ uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
 ### 5.4 `POST /api/chat` 逻辑树（核心）
 
-**认证**：`Depends(get_current_user)` — **无有效 Bearer 返回 401**。
+**认证**：`Depends(_dep_optional_user)` — **可选认证**。未携带 `Authorization` 头时允许**匿名调用**（`user` 为 `None`）；携带有效 Bearer token 时用于**识别登录用户**；token 缺失或无效都**不会返回 401**。
 
 1. 若 `req.mode == "emotional"`：  
    - 使用心理疏导 system prompt（纯文本、单问、危机热线等）。  
@@ -354,7 +354,7 @@ uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
 ### 6.1 `GET /`
 
-- **响应示例**：`{ "status": "ok", "service": "Health Companion API" }`
+- **响应示例**：`{ "status": "ok", "service": "AI Health Assistant API" }`
 
 ### 6.2 `GET /health`
 
@@ -373,12 +373,12 @@ uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
 | 项 | 说明 |
 |----|------|
-| 认证 | **需要** `Authorization: Bearer <token>` |
+| 认证 | **可选**：不传 `Authorization` 可匿名使用；传有效 `Bearer <token>` 时识别登录用户（token 缺失或无效均不返回 401） |
 | Content-Type | `application/json` |
-| Body | `{ "session_id": string, "message": string, "mode": "medical" \| "emotional", "history": [ { "role": "user"\|"ai", "content": string } ] }` |
+| Body | `{ "session_id": string, "message": string, "mode": "medical" \| "emotional" \| "diet", "history": [ { "role": "user"\|"ai", "content": string } ] }` |
 | 响应 | **SSE 流**（`text/event-stream`），非 JSON 单包 |
 
-**说明**：`mode` 实际可传 `diet`，但后端不按字符串枚举校验；`diet` 会走「非 emotional」分支。
+**说明**：`mode` 取值为 `medical`（默认）/ `emotional` / `diet`，后端不按字符串枚举校验。`emotional` 与 `diet` **各自有独立分支和独立 system prompt**，都**不进入意图分类，也不进行 RAG 检索**（见 5.4 节）；其余取值走 medical 链路（意图分类 → RAG → 问诊 Prompt）。
 
 ### 6.5 `POST /api/report`
 
@@ -492,6 +492,8 @@ data: <JSON>\n\n
 
 ## 9. 数据模型与数据库
 
+共 **7 张表**，全部定义于 `backend-server/database.py`（`init_db()` 建表）。
+
 ### 9.1 表：`users`
 
 | 列 | 类型/说明 |
@@ -529,7 +531,32 @@ data: <JSON>\n\n
 | report_type | `standard` / `monthly` / `annual` |
 | created_at | 索引，支持按日筛选 |
 
-### 9.5 迁移
+### 9.5 表：`medications` / `medication_checkins`
+
+**`medications`（药品配置）**
+
+| 列 | 说明 |
+|----|------|
+| user_id | FK → users |
+| name | 药品名（`String(64)`） |
+| dosage | 剂量说明（`String(32)`，默认空串） |
+| times | 服药时段，JSON 字符串，如 `["morning","evening"]`（`String(128)`） |
+| note | 备注（`String(128)`，默认空串） |
+| created_at, updated_at | 时间戳（更新时自动刷新） |
+
+**`medication_checkins`（服药打卡）**
+
+| 列 | 说明 |
+|----|------|
+| user_id | FK → users |
+| med_id | FK → medications（删除药品时打卡级联删除） |
+| date_key | `YYYY-MM-DD`（`String(10)`） |
+| time_slot | `morning` / `noon` / `evening` / `bedtime`（`String(16)`） |
+
+- 索引：`ix_med_checkin_user_date`（`user_id`, `date_key`）。
+- 该表无独立时间戳列，一条打卡即一行。
+
+### 9.6 迁移
 
 在配置好 `DATABASE_URL` 后执行：
 
@@ -618,7 +645,6 @@ python data.py
 | 会话消息未落库 | `utils/api.js` 已提供 `saveMessage` / `getMessages`，但**当前无任何页面调用**，因此对话消息不会写入 `chat_messages` 表（会话 id 本身由 `pages/chat/chat.js` 通过 `POST /api/session` 正常创建） |
 | `emotional` 页会话 id | `pages/emotional/emotional.js` 固定使用 `'wx_session_diet'`，未接入 `POST /api/session`（该页亦不落库会话消息） |
 | `get_recent_moods` 的 map | 不是完整日历填充，前端若要做「无洞」日历需自行补全 |
-| LangChain | requirements 含 langchain，核心业务路径未依赖其 Chain 抽象 |
 
 ---
 

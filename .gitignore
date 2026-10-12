@@ -30,7 +30,7 @@ backend-server/chroma_db_test/
 *.bin
 *.safetensors
 
-# ── 第三方数据集（许可证未核实，禁止分发；本地保留） ──
+# ── 第三方数据集（体积较大，不随仓库分发；本地保留） ──
 # 仅排除已确认的数据文件，不使用 *.jsonl 全局规则
 huatuo_sample.jsonl
 huatuo_text_test_subset.jsonl

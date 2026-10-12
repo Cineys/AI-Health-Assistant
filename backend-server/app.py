@@ -1,5 +1,5 @@
 """
-app.py — Health Companion 后端主服务
+app.py — AI Health Assistant 后端主服务
 ────────────────────────────────────
 启动方式：
     uvicorn app:app --host 0.0.0.0 --port 8000 --reload
@@ -81,7 +81,7 @@ if not DASHSCOPE_API_KEY:
 dashscope.api_key = DASHSCOPE_API_KEY
 
 # ── FastAPI 应用 ───────────────────────────────────────────────────────────────
-app = FastAPI(title="Health Companion API", version="1.0.0")
+app = FastAPI(title="AI Health Assistant API", version="1.0.0")
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -537,7 +537,7 @@ class ReportRequest(BaseModel):
 # ── 路由 ──────────────────────────────────────────────────────────────────────
 @app.get("/")
 def root():
-    return {"status": "ok", "service": "Health Companion API"}
+    return {"status": "ok", "service": "AI Health Assistant API"}
 
 
 @app.get("/health")
