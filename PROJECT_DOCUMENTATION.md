@@ -124,7 +124,7 @@ V1 与 V2 两版产品需求文档（`prd.md` / `PRD_v2.md`）记录了本项目
 | `tests/test_database_config.py` | 数据库连接串脱敏桩测试（Python） |
 | `tests/test_auth_config.py` | JWT 密钥校验桩测试（Python） |
 | `docs/本地开发配置.md` | AppID 与后端地址的本地配置说明 |
-| `docs/screenshots/` | 用于 README 的 5 张项目界面及功能演示截图 |
+| `docs/screenshots/` | 用于 README 的 11 张项目界面及功能演示截图 |
 | `architecture-docs/系统架构说明.md` | 系统架构、模块划分、实体关系、演进建议 |
 
 ### 3.4 本地文件（**不包含在公开仓库中**）
@@ -204,7 +204,7 @@ V1 与 V2 两版产品需求文档（`prd.md` / `PRD_v2.md`）记录了本项目
   - `auth === true`（默认）时，若本地有 token，则加 `Authorization: Bearer <token>`。  
   - 2xx 解析 `res.data`；否则 `reject(Error(detail 或 statusCode))`。  
 - **`login`**：`auth=false`，不带头。  
-- **`generateReport(messages)`**：POST body 固定包含 `session_id: 'wx_session_001'`（与真实 DB 会话 id 无绑定，见第 14 节）。
+- **`generateReport(messages, sessionId)`**：`session_id` 由调用方传入。`pages/chat/chat.js` 在对话开始时通过 `POST /api/session` 创建**真实会话 id** 并透传；未创建成功时传 `null`。
 
 ### 4.5 `utils/mood.js` 本地存储协议
 
@@ -239,14 +239,15 @@ V1 与 V2 两版产品需求文档（`prd.md` / `PRD_v2.md`）记录了本项目
 - **首条 AI 文案**：医疗默认问诊引导；`emotional` 为心理疏导；`diet` 标题改为「膳食管家」、快捷标签替换，并可用 **静默发送** `_doSend(ctx, true)` 不发用户气泡。  
 - **流式**：`BASE_URL` 从 `utils/config.js` 读取（`require('../../utils/config')`），与 `utils/api.js` 同源，无需单独修改。  
 - **请求**：`POST /api/chat`，Header：`content-type: application/json`、`Accept: text/event-stream`、可选 `Authorization`。  
-- **Body**：`{ session_id: 'wx_session_001', message, mode, history }`，`history` 为当前列表中已有内容的 `{ role, content }`（`role` 为 `user` 或 `ai`）。  
-- **生成报告**：`generateReport()` → `api.generateReport(payload)`，`payload` 为过滤后的消息列表；成功则 `globalData.lastReport` 并 `navigateTo` 报告页。
+- **Body**：`{ session_id: <真实会话 id>, message, mode, history }`，`session_id` 由 `POST /api/session` 创建（见 4.6 节下方说明），`history` 为当前列表中已有内容的 `{ role, content }`（`role` 为 `user` 或 `ai`）。  
+- **生成报告**：`generateReport()` → `api.generateReport(payload, this._sessionId)`，`payload` 为过滤后的消息列表；成功则 `globalData.lastReport` 并 `navigateTo` 报告页。
+- **会话 id**：`onLoad` 时通过 `api.createSession(mode)` 调用 `POST /api/session` 获取真实会话 id 存入 `this._sessionId`，聊天与报告请求均复用它。
 
 #### `pages/emotional/emotional`（心理疏导 / 膳食）
 
 - 与 `chat.js` 类似的 SSE 客户端实现。  
 - **`session_id`** 使用 `'wx_session_diet'`（与诊室区分）。  
-- **`mode`**：`emotional` 或 `diet`。注意：后端仅当 **`mode === "emotional"`** 时走心理疏导分支；**`diet` 会落入医疗分支**（意图分类 + 可能 RAG），见第 5.4 节。
+- **`mode`**：`emotional` 或 `diet`。后端对两者都有**独立分支**：`emotional` 走心理疏导 Prompt，`diet` 走营养学 Prompt，**都不经过意图分类，也不进行 RAG 检索**，见第 5.4 节。
 
 #### `pages/report/report`（报告详情）
 
@@ -275,7 +276,7 @@ V1 与 V2 两版产品需求文档（`prd.md` / `PRD_v2.md`）记录了本项目
 #### `pages/profile/profile`（我的）
 
 - **统计**：若已登录，`Promise.all([api.getMoodStats(), api.listReports()])` 更新 streak、记录数、报告数；失败则 `_loadStatsLocal()` 用本地 mood + globalData。  
-- **热力图**：近 35 天 `mood.getRecentDays(35)`，按周起始补空 cell，颜色映射 5 档心情。  
+- **热力图**：**26 周 × 7 天**的 GitHub 风格网格（`TOTAL_WEEKS = 26`），横向滚动，按周起始补空 cell，颜色映射 5 档心情；`mood.getRecentDays(n)` 另用于 **7 / 30 天**情绪趋势曲线。  
 - **趋势图**：Canvas `type="2d"`，7/30 天切换，贝塞尔面积图 + 折线 + 点。  
 - **膳食卡片**：`_updateDietCard` 按今日心情选预设分数与宜忌标签；`goToDiet` 与首页类似写 `dietContext` 跳转 `emotional?mode=diet`。  
 - **跳转**：历史报告、月度、年度、关于弹窗等。
@@ -310,7 +311,11 @@ uvicorn app:app --host 0.0.0.0 --port 8000 --reload
    - 使用心理疏导 system prompt（纯文本、单问、危机热线等）。  
    - **不进行** `classify_intent`，**不进行** RAG。
 
-2. 否则（含 `medical`、`diet` 等）：  
+2. 若 `req.mode == "diet"`：  
+   - 使用营养学 / 中医食疗 system prompt。  
+   - **不进行** `classify_intent`，**不进行** RAG。
+
+3. 否则（`medical` 及默认情况）：  
    - `intent = await classify_intent(message, history)`，标签：`chat` | `medical` | `emergency`。  
    - `emergency` → 急救引导 prompt。  
    - `chat` → 日常闲聊 prompt（仍禁止瞎诊断）。  
@@ -610,8 +615,8 @@ python data.py
 
 | 问题 | 说明 |
 |------|------|
-| `session_id` 写死 | 与 `POST /api/session` 创建的整数 id 未打通；会话表消息未在诊室页自动落库 |
-| `diet` 模式 | 前端传 `diet` 时后端走医疗链路，若产品期望「非 RAG 膳食顾问」需加专门分支 |
+| 会话消息未落库 | `utils/api.js` 已提供 `saveMessage` / `getMessages`，但**当前无任何页面调用**，因此对话消息不会写入 `chat_messages` 表（会话 id 本身由 `pages/chat/chat.js` 通过 `POST /api/session` 正常创建） |
+| `emotional` 页会话 id | `pages/emotional/emotional.js` 固定使用 `'wx_session_diet'`，未接入 `POST /api/session`（该页亦不落库会话消息） |
 | `get_recent_moods` 的 map | 不是完整日历填充，前端若要做「无洞」日历需自行补全 |
 | LangChain | requirements 含 langchain，核心业务路径未依赖其 Chain 抽象 |
 
